@@ -1,0 +1,376 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>מתי לטוס לארה״ב</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Frank+Ruhl+Libre:wght@500;700&family=Heebo:wght@400;500;700&display=swap" rel="stylesheet">
+</head>
+<body>
+<style>
+/* Layout: one framed card. A two-mode switch, then a clickable US map of regions, then cards or a ranked list. */
+:root{
+  --bg:#e4e9f2; --panel:#ffffff; --ink:#1b2a4a; --muted:#5b6478; --line:#d6dae3; --accent:#b22234; --accent-ink:#ffffff;
+  --map:#cdd6e6; --map-hover:#b3c1da; --sel:#e9a3ab; --park:#2f6b4f;
+  --sum-bg:#1c3566; --sum-ink:#ffffff; --sum-muted:#c9d4e6; --sum-k:#ffb3bb; --sum-tile:#2a4579;
+  --g-bg:#3a9a6a; --g-ink:#ffffff; --m-bg:#e2b84a; --m-ink:#1b2a4a; --b-bg:#46597f; --b-ink:#c9d4e6;
+  --s1:#e7eaf1; --s2:#bccbe2; --s3:#7b95c2; --s4:#3d5f99; --s5:#1c3566;
+  --on1:#1b2a4a; --on2:#1b2a4a; --on3:#ffffff; --on4:#ffffff; --on5:#ffffff;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#1c2a44; --panel:#25365a; --ink:#f4f7fb; --muted:#c9d4e6; --line:#3f5680; --accent:#ff6b7a; --accent-ink:#1c2a44;
+    --map:#3a4d74; --map-hover:#4a6190; --sel:#a8404f; --park:#5fbf8f;
+  --sum-bg:#101b31; --sum-ink:#ffffff; --sum-muted:#c9d4e6; --sum-k:#ff8f9b; --sum-tile:#22345a;
+  --g-bg:#3a9a6a; --g-ink:#ffffff; --m-bg:#e2b84a; --m-ink:#1b2a4a; --b-bg:#33456b; --b-ink:#c9d4e6;
+    --sum-bg:#101b31; --sum-ink:#ffffff; --sum-muted:#c9d4e6; --sum-k:#ff8f9b; --sum-tile:#22345a;
+    --g-bg:#3a9a6a; --g-ink:#ffffff; --m-bg:#e2b84a; --m-ink:#1b2a4a; --b-bg:#33456b; --b-ink:#c9d4e6;
+    --s1:#33405a; --s2:#4a6490; --s3:#6a8fc6; --s4:#8fb2e4; --s5:#c9dcf6;
+    --on1:#f4f7fb; --on2:#ffffff; --on3:#0b1530; --on4:#0b1530; --on5:#0b1530;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#1c2a44; --panel:#25365a; --ink:#f4f7fb; --muted:#c9d4e6; --line:#3f5680; --accent:#ff6b7a; --accent-ink:#1c2a44;
+  --map:#3a4d74; --map-hover:#4a6190; --sel:#a8404f; --park:#5fbf8f;
+  --s1:#33405a; --s2:#4a6490; --s3:#6a8fc6; --s4:#8fb2e4; --s5:#c9dcf6;
+  --on1:#f4f7fb; --on2:#ffffff; --on3:#0b1530; --on4:#0b1530; --on5:#0b1530;
+  color-scheme: dark;
+}
+*{box-sizing:border-box}
+body{margin:0;background:transparent;color:var(--ink);font:16px/1.6 "Heebo",system-ui,sans-serif;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:4px}
+.wrap{max-width:820px;margin:0 auto;min-width:0;background:var(--panel);border:1px solid var(--line);border-radius:18px;overflow:hidden;padding:24px 20px 20px;box-shadow:0 10px 30px rgba(27,42,74,.10)}
+.wrap::before{content:"";display:block;height:12px;margin:-24px -20px 20px;background:linear-gradient(90deg,#b22234 0 33.3%,#f4f6fa 33.3% 66.6%,#1c3566 66.6% 100%)}
+h1,h2,h3{color:var(--ink)}
+h1{font:700 38px/1.2 "Frank Ruhl Libre",serif;margin:4px 0 8px;text-wrap:balance}
+h2{font:500 24px/1.3 "Frank Ruhl Libre",serif;margin:0 0 12px}
+h3{font:700 22px/1.3 "Frank Ruhl Libre",serif;margin:0 0 6px}
+.kicker{margin:0;color:var(--accent);font-weight:500;font-size:16px;letter-spacing:.02em}
+.lede{margin:0 0 18px;color:var(--muted);max-width:60ch;font-size:17px}
+.seg{display:flex;gap:4px;padding:4px;background:var(--panel);border:1px solid var(--line);border-radius:12px;margin-bottom:22px}
+.seg button{flex:1;border:0;background:transparent;color:var(--muted);font:500 17px "Heebo",sans-serif;padding:10px 8px;border-radius:9px;cursor:pointer}
+.seg button[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink)}
+.mapbox{background:var(--bg);border-radius:14px;padding:8px;margin:0 0 8px}
+.mapbox svg{display:block;width:100%;height:auto;max-width:100%}
+.rg{fill:var(--map);stroke:var(--panel);stroke-width:2.5;cursor:pointer;transition:fill .15s}
+.rg:hover{fill:var(--map-hover)}
+.rg.on{fill:var(--sel);stroke:var(--accent);stroke-width:3}
+.rg:focus-visible{outline:none;stroke:var(--accent);stroke-width:4}
+.rg.c1{fill:var(--s1)}.rg.c2{fill:var(--s2)}.rg.c3{fill:var(--s3)}.rg.c4{fill:var(--s4)}.rg.c5{fill:var(--s5)}
+.bd{fill:none;stroke:var(--panel);stroke-width:.8;stroke-opacity:.55;pointer-events:none}
+.lbl{font:700 25px "Heebo",sans-serif;fill:var(--ink);stroke:var(--panel);stroke-width:5px;paint-order:stroke;stroke-linejoin:round;pointer-events:none;text-anchor:middle}
+.pk{cursor:pointer}
+.rg:focus,.pk:focus{outline:none}
+.pk circle{fill:var(--park);stroke:var(--panel);stroke-width:2.5}
+.pk path{fill:#ffffff}
+.pk.on circle{fill:var(--accent)}
+.pk:focus-visible{outline:none}.pk:focus-visible circle{stroke:var(--accent);stroke-width:4}
+.pk.c1 circle{fill:var(--s1)}.pk.c2 circle{fill:var(--s2)}.pk.c3 circle{fill:var(--s3)}.pk.c4 circle{fill:var(--s4)}.pk.c5 circle{fill:var(--s5)}
+.pk.c1 path{fill:var(--on1)}.pk.c2 path{fill:var(--on2)}.pk.c3 path{fill:var(--on3)}.pk.c4 path{fill:var(--on4)}.pk.c5 path{fill:var(--on5)}
+.maphint{display:flex;flex-wrap:wrap;gap:6px 16px;align-items:center;margin:0 0 16px;font-size:14px;color:var(--muted)}
+.maphint .tree{display:inline-grid;place-items:center;width:18px;height:18px;border-radius:50%;background:var(--park);vertical-align:-4px;margin-inline-end:4px}
+.maphint .tree::after{content:"";border:5px solid transparent;border-bottom:8px solid #fff;border-top:0;margin-top:-2px}
+.sum{background:var(--sum-bg);color:var(--sum-ink);border-radius:16px;padding:18px;margin:0 0 18px}
+.sum .k{margin:0 0 4px;font-size:14px;font-weight:700;letter-spacing:.06em;color:var(--sum-k)}
+.sum .big{margin:0;font:700 26px/1.3 "Frank Ruhl Libre",serif;color:var(--sum-ink);text-wrap:balance}
+.sum .sub{margin:6px 0 0;color:var(--sum-muted);font-size:16px}
+.sum .sub b{color:var(--sum-ink);font-weight:500}
+.cal{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:4px;margin-top:14px}
+.cal span{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;height:54px;border-radius:8px;font-size:13px;font-weight:500}
+.cal i{font-style:normal;font-size:15px;line-height:1}
+.cal .g{background:var(--g-bg);color:var(--g-ink)}.cal .m{background:var(--m-bg);color:var(--m-ink)}.cal .b{background:var(--b-bg);color:var(--b-ink)}
+.cal-key{display:flex;flex-wrap:wrap;gap:6px 14px;margin-top:10px;font-size:14px;color:var(--sum-muted)}
+.cal-key span{display:inline-flex;align-items:center;gap:6px}
+.cal-key i{width:14px;height:14px;border-radius:4px;display:inline-block}
+.top3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-top:12px}
+.top3 div{background:var(--sum-tile);border-radius:12px;padding:10px 12px;min-width:0}
+.top3 .n{font-size:13px;color:var(--sum-muted)}
+.top3 strong{display:block;font:700 19px/1.25 "Frank Ruhl Libre",serif;color:var(--sum-ink)}
+.top3 em{font-style:normal;font-size:14px;color:var(--sum-k)}
+@media (max-width:480px){.top3{grid-template-columns:1fr}.cal span{height:46px;font-size:11px}.sum .big{font-size:22px}}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px}
+.group{width:100%;margin:10px 0 2px;color:var(--muted);font-size:14px;letter-spacing:.04em}
+.chip{border:1px solid var(--line);background:var(--panel);color:var(--ink);font:500 16px "Heebo",sans-serif;padding:7px 13px;border-radius:999px;cursor:pointer}
+.chip[aria-pressed="true"]{border-color:var(--accent);background:color-mix(in srgb,var(--accent) 16%,var(--panel));color:var(--ink)}
+.chip.park{border-style:dashed}
+.presets{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px}
+.presets button{border:0;background:var(--line);color:var(--ink);font:500 15px "Heebo",sans-serif;padding:7px 12px;border-radius:8px;cursor:pointer}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px;margin-bottom:12px;min-width:0}
+.best{margin:0 0 10px;color:var(--muted);font-size:16px}
+.best b{color:var(--ink);font-weight:500}
+.heat{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:2px}
+.mh{font-size:12px;color:var(--muted);text-align:center}
+.cell{height:40px;display:flex;align-items:center;justify-content:center;border-radius:6px;font-weight:500;font-size:16px;font-variant-numeric:tabular-nums}
+.c1{background:var(--s1);color:var(--on1)}.c2{background:var(--s2);color:var(--on2)}.c3{background:var(--s3);color:var(--on3)}
+.c4{background:var(--s4);color:var(--on4)}.c5{background:var(--s5);color:var(--on5)}
+.note{margin:10px 0 0;color:var(--muted);font-size:16px}
+.inc-h{margin:14px 0 6px;font-weight:500;font-size:15px}
+.inc{list-style:none;padding:0;margin:0;display:grid;gap:6px}
+.inc li{display:flex;justify-content:space-between;align-items:baseline;gap:4px 12px;flex-wrap:wrap;padding:8px 12px;background:var(--bg);border-radius:8px;font-size:15px}
+.inc li b{font-weight:500}
+.inc li span{color:var(--muted)}
+.inc-line{margin:4px 0 0;font-size:15px;font-weight:500}
+.legend{display:flex;flex-wrap:wrap;gap:10px;margin:4px 0 14px;font-size:14px;color:var(--muted)}
+.legend span{display:inline-flex;align-items:center;gap:5px}
+.legend i{width:14px;height:14px;border-radius:4px;display:inline-block}
+.rank{list-style:none;padding:0;margin:0}
+.rank li{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px 16px;margin-bottom:10px;min-width:0;transition:box-shadow .3s}
+.rank li.flash{box-shadow:0 0 0 3px var(--accent)}
+.rk-head{display:flex;justify-content:space-between;align-items:baseline;gap:10px}
+.rk-name{font:700 21px "Frank Ruhl Libre",serif;color:var(--ink)}
+.rk-score{font-weight:500;font-variant-numeric:tabular-nums;color:var(--accent)}
+.bar{height:8px;border-radius:99px;background:var(--line);margin:8px 0;overflow:hidden}
+.bar span{display:block;height:100%;background:var(--s5);border-radius:99px}
+.warn{margin:6px 0 0;color:var(--accent);font-size:16px}
+.hint{color:var(--muted);padding:18px;border:1px dashed var(--line);border-radius:14px;text-align:center;font-size:16px}
+.foot{margin-top:24px;color:var(--muted);font-size:14px;border-top:1px solid var(--line);padding-top:14px}
+[hidden]{display:none!important}
+button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+@media (prefers-reduced-motion: reduce){.rg,.rank li{transition:none}}
+</style>
+
+<div dir="rtl" lang="he" class="wrap">
+  <header>
+    <p class="kicker">מדריך עונות · ארצות הברית</p>
+    <h1>מתי לטוס לארה״ב</h1>
+    <p class="lede">לחצו על אזור במפה וראו מתי הכי כדאי לטוס אליו, או בחרו חודשים וראו על המפה אילו אזורים מתאימים לתקופה.</p>
+  </header>
+
+  <div class="seg" role="group" aria-label="מצב">
+    <button id="tabA" data-mode="a" aria-pressed="true">לאן אני רוצה</button>
+    <button id="tabB" data-mode="b" aria-pressed="false">תאריכים שלי</button>
+  </div>
+
+  <section id="modeA">
+    <h2>בחרו אזורים במפה</h2>
+    <div id="mapSlotA"></div>
+    <div id="sumA"></div>
+    <div id="chipsA"></div>
+    <div id="outA"></div>
+  </section>
+
+  <section id="modeB" hidden>
+    <h2>בחרו חודשים</h2>
+    <div class="presets" id="presets"></div>
+    <div id="chipsB" class="chips"></div>
+    <div id="mapSlotB"></div>
+    <div id="sumB"></div>
+    <div id="outB"></div>
+  </section>
+
+  <div id="mapArea">
+    <div class="mapbox"><svg id="usmap" role="group" aria-label="מפת ארצות הברית לפי אזורים"></svg></div>
+    <div class="maphint" id="mapHint"></div>
+  </div>
+
+  <p class="foot">הציונים הם סיכום כללי לפי המדריך באתר usa4travelers.com ונתוני אקלים ממוצעים, ולא תחזית למזג האוויר בתאריך מסוים. לפני ההזמנה בדקו סטטוס כבישים ופארקים באתר NPS הרשמי, ואת סיכוני ההוריקנים באתר NHC.</p>
+</div>
+
+<script>
+(function(){
+const MAP={"w":960,"h":600,"regions":{"ne":"M934,120L934,120L934,120ZM932,121L932,121L932,121ZM931,117L931,117L931,117ZM927,121L927,121L927,121ZM928,129L928,129L928,129ZM926,124L926,124L926,124ZM925,121L925,121L925,121ZM907,183L906,182L899,192L883,198L873,206L897,200L882,212L869,214L868,214L866,218L871,220L872,233L863,248L850,241L850,241L851,240L850,245L861,256L863,264L862,273L856,276L843,267L843,274L830,267L830,263L829,261L817,254L809,248L799,251L790,262L788,251L772,254L768,235L764,207L774,199L786,186L781,176L789,172L813,170L822,162L818,149L836,127L858,122L884,116L889,108L897,93L896,76L903,57L909,62L917,55L925,59L933,87L950,101L944,111L931,119L926,115L923,129L909,141L907,152L906,157L906,167L916,177L926,177L909,186ZM923,186L923,186L923,186ZM914,188L914,188L914,188ZM851,277L850,277L851,277ZM848,274L848,274L848,274ZM841,262L841,262L841,262ZM896,194L896,194L896,194ZM896,198L896,198L896,198ZM894,197L894,197L894,197ZM819,156L819,156L819,156ZM818,156L818,156L818,156ZM904,184L904,184L904,184ZM905,188L905,188L905,188ZM903,195L903,195L903,195Z","se":"M818,564L818,564L818,564ZM816,565L816,565L816,565ZM811,568L811,568L811,568ZM799,573L799,573L799,573ZM795,574L795,574L795,574ZM792,574L792,574L792,574ZM784,530L784,530L784,530ZM777,575L777,575L777,575ZM731,472L731,472L731,472ZM743,286L747,285L758,263L767,255L768,235L772,254L788,251L790,262L799,251L809,248L817,254L829,261L830,263L830,267L829,274L847,279L846,290L859,306L859,312L848,321L863,318L865,326L855,335L851,343L859,341L856,349L848,349L840,356L835,369L826,371L818,380L815,391L797,406L792,416L788,423L786,445L792,463L809,487L811,497L823,517L826,545L823,556L811,560L805,548L797,546L792,536L773,515L778,507L769,508L769,486L749,468L737,465L724,477L707,465L694,463L678,467L675,452L722,447L717,430L721,421L714,409L702,365L724,362L724,357L756,333L763,323L730,327L739,323L756,303L743,292ZM864,318L864,318L864,318ZM863,337L863,337L863,337ZM851,279L851,279L851,279ZM856,276L862,273L857,293L853,292ZM851,277L850,277L851,277Z","south":"M664,469L664,469L664,469ZM634,339L635,339L639,328L656,309L662,305L670,308L676,304L690,301L696,286L706,283L705,277L715,282L731,284L737,280L743,286L743,292L756,303L739,323L730,327L763,323L756,333L724,357L724,362L702,365L714,409L721,421L717,430L722,447L675,452L678,467L669,459L662,467L642,472L644,489L651,497L638,491L631,496L627,491L620,497L600,482L592,488L576,484L564,486L547,493L536,504L517,515L510,514L498,536L498,553L503,565L499,567L466,554L460,531L445,514L439,497L425,482L410,479L404,481L394,496L370,481L363,458L356,454L338,432L337,427L400,433L407,338L408,338L408,328L424,329L548,332L548,342L623,340L619,350L630,350L633,339ZM660,470L660,470L660,470ZM656,470L656,470L656,470ZM652,471L652,471L652,471ZM649,470L649,470L649,470ZM654,474L654,474L654,474ZM646,474L646,474L646,474ZM641,486L641,486L641,486ZM628,496L628,496L628,496ZM625,496L625,496L625,496ZM621,497L621,497L621,497ZM598,487L598,487L598,487Z","mid":"M720,219L736,224L747,220L764,207L768,235L767,255L758,263L747,285L743,286L737,280L731,284L715,282L705,277L706,283L696,286L690,301L676,304L670,308L662,305L656,309L639,328L635,339L634,339L633,339L630,350L619,350L623,340L548,342L548,332L424,329L428,265L430,244L398,242L402,199L405,157L407,138L413,74L508,79L537,79L541,73L544,84L556,89L567,86L585,94L616,97L603,104L581,124L582,125L597,120L606,127L619,121L636,106L636,117L645,119L649,125L661,125L667,120L684,116L684,122L695,120L698,129L706,131L688,135L676,134L656,139L649,155L645,167L657,154L652,166L648,194L651,210L657,226L667,224L675,209L674,197L668,184L670,162L678,150L688,145L689,136L709,143L713,149L714,164L706,177L711,180L721,169L726,173L732,190ZM691,134L691,134L691,134ZM680,137L680,137L680,137ZM678,137L678,137L678,137ZM677,142L677,142L677,142ZM676,139L676,139L676,139ZM674,145L674,145L674,145ZM672,152L672,152L672,152ZM671,155L671,155L671,155ZM661,143L661,143L661,143ZM621,99L621,99L621,99ZM731,220L731,220L731,220ZM729,219L729,219L729,219ZM658,149L658,149L658,149ZM652,153L652,153L652,153ZM604,118L604,118L604,118ZM604,121L604,121L604,121ZM602,120L602,120L602,120ZM600,122L600,122L600,122ZM601,119L601,119L601,119ZM600,118L600,118L600,118ZM600,123L600,123L600,123ZM597,119L597,119L597,119Z","nw":"M233,46L247,49L242,70L245,82L253,96L261,103L254,120L256,127L262,123L271,144L272,151L283,151L301,156L292,207L247,199L201,190L156,179L94,161L94,143L104,128L124,79L129,78L122,76L124,66L127,31L135,38L151,44L152,61L158,48L156,27ZM150,60L150,60L150,60ZM155,36L155,36L155,36ZM155,32L155,32L155,32ZM154,35L154,35L154,35ZM151,42L151,42L151,42ZM152,30L152,30L152,30ZM150,31L150,31L150,31ZM152,25L152,25L152,25ZM148,33L148,33L148,33ZM148,31L148,31L148,31Z","sw":"M94,161L156,179L201,190L247,199L292,207L289,228L320,233L309,317L408,328L408,338L407,338L400,433L337,427L338,432L308,428L307,438L292,436L256,431L195,395L198,390L156,385L153,367L139,349L128,344L124,337L109,332L110,318L96,284L100,278L93,267L97,252L88,248L90,243L82,225L86,207L81,196L92,173ZM135,360L135,360L135,360ZM133,369L133,369L133,369ZM127,358L127,358L127,358ZM124,345L124,345L124,345ZM117,360L117,360L117,360ZM116,342L116,342L116,342ZM110,342L110,342L110,342ZM107,341L107,341L107,341Z","rocky":"M247,49L413,74L407,138L405,157L402,199L398,242L430,244L428,265L424,329L408,328L309,317L320,233L289,228L292,207L301,156L283,151L272,151L271,144L262,123L256,127L254,120L261,103L253,96L245,82L242,70Z","hawaii":"M346,555L350,544L362,549L371,559L350,569ZM334,530L347,533L339,537ZM333,538L333,538L333,538ZM326,530L326,530L326,530ZM322,526L322,526L322,526ZM302,516L309,513L315,522ZM273,507L273,507L273,507ZM264,510L264,510L264,510Z","alaska":"M166,518L166,518L166,518ZM165,531L165,531L165,531ZM162,533L162,533L162,533ZM162,533L162,533L162,533ZM161,533L161,533L161,533ZM161,540L161,540L161,540ZM160,535L160,535L160,535ZM160,524L160,524L160,524ZM159,535L159,535L159,535ZM158,526L158,526L158,526ZM155,541L158,537L161,539L157,542ZM155,531L155,531L155,531ZM152,551L152,551L152,551ZM151,552L151,552L151,552ZM150,546L155,542L159,542L160,546L158,545L153,551L154,548L152,550ZM150,553L150,553L150,553ZM146,558L146,558L146,558ZM142,556L142,556L142,556ZM141,555L141,555L141,555ZM139,552L139,552L139,552ZM137,553L137,553L137,553ZM133,557L133,557L133,557ZM132,556L132,556L132,556ZM130,564L130,564L130,564ZM131,557L131,557L131,557ZM130,563L130,563L130,563ZM129,564L129,564L129,564ZM129,561L129,561L129,561ZM128,564L128,564L128,564ZM128,562L128,562L128,562ZM127,560L127,560L127,560ZM127,563L127,563L127,563ZM129,535L129,535L129,535ZM127,559L127,559L127,559ZM128,535L128,535L128,535ZM124,560L124,560L124,560ZM126,536L126,536L126,536ZM122,560L122,560L122,560ZM121,560L121,560L121,560ZM120,561L120,561L120,561ZM117,562L117,562L117,562ZM125,499L125,499L125,499ZM115,565L115,565L115,565ZM115,558L115,558L115,558ZM106,566L106,566L106,566ZM105,566L105,566L105,566ZM104,566L104,566L104,566ZM103,566L103,566L103,566ZM103,565L103,565L103,565ZM101,565L101,565L101,565ZM100,566L100,566L100,566ZM104,520L109,520L111,521L111,524L108,525ZM92,570L97,568L99,566L101,567L97,570ZM110,481L116,478L123,476L124,477L124,480L130,481L132,480L129,476L130,474L128,474L125,472L125,469L122,465L118,462L120,459L126,459L129,457L130,453L133,450L136,450L139,447L143,447L146,444L149,445L149,447L150,445L152,447L155,447L157,447L157,449L160,451L164,449L169,451L174,451L176,452L180,450L186,453L200,520L204,520L207,518L207,520L214,525L215,527L218,524L218,521L220,519L227,524L231,526L239,534L241,537L249,538L251,544L250,549L247,546L243,545L239,542L240,540L238,537L233,535L231,531L229,529L227,529L222,522L225,530L223,529L219,531L215,529L212,527L205,525L205,522L203,524L198,523L193,523L189,524L180,520L177,517L177,519L173,520L176,525L174,526L170,526L167,531L162,533L161,531L163,530L161,528L162,525L162,521L166,519L167,520L167,517L165,517L162,519L156,529L153,532L152,533L155,534L152,541L149,542L143,547L143,549L139,550L135,553L134,556L129,556L126,559L122,559L120,561L115,562L112,564L107,564L109,561L116,560L121,555L126,555L127,553L133,549L138,544L140,538L141,535L137,537L136,535L134,538L131,534L129,533L123,536L123,530L124,529L123,524L122,525L117,526L112,519L114,516L111,512L113,510L113,508L117,504L118,501L120,500L123,502L126,499L130,500L131,498L130,492L132,491L131,489L126,492L120,491L118,491L115,490L114,485L115,484L112,483ZM86,572L90,568L93,569ZM85,572L85,572L85,572ZM84,570L84,570L84,570ZM90,544L90,544L90,544ZM84,570L84,570L84,570ZM82,571L82,571L82,571ZM82,570L82,570L82,570ZM81,572L81,572L81,572ZM88,540L88,540L88,540ZM78,572L78,572L78,572ZM77,572L77,572L77,572ZM76,572L76,572L76,572ZM95,493L100,493L102,496L105,497L101,499L100,496ZM70,572L70,572L70,572ZM85,513L85,513L85,513ZM85,512L85,512L85,512ZM63,571L63,571L63,571ZM58,570L58,570L58,570ZM57,570L57,570L57,570ZM57,569L57,569L57,569ZM56,570L56,570L56,570ZM55,570L55,570L55,570ZM54,568L54,568L54,568ZM53,570L53,570L53,570ZM49,570L51,568L53,570ZM48,568L48,568L48,568ZM47,569L47,569L47,569ZM45,567L45,567L45,567ZM42,568L42,568L42,568ZM41,568L41,568L41,568ZM42,566L42,566L42,566ZM40,569L40,569L40,569ZM39,569L39,569L39,569ZM35,562L35,562L35,562ZM31,563L31,563L31,563ZM31,560L31,560L31,560ZM30,561L30,561L30,561ZM30,559L30,559L30,559ZM26,558L26,558L26,558ZM22,553L22,553L22,553ZM16,547L16,547L16,547ZM15,546L15,546L15,546ZM15,546L15,546L15,546ZM12,547L12,547L12,547ZM10,542L10,542L10,542ZM247,547L247,547L247,547ZM246,548L246,548L246,548ZM246,548L246,548L246,548ZM245,548L245,548L245,548ZM244,546L244,546L244,546ZM239,539L239,539L239,539ZM239,540L239,540L239,540ZM238,539L238,539L238,539ZM241,550L241,550L241,550ZM237,541L237,541L237,541ZM237,540L237,540L237,540ZM238,547L238,547L238,547ZM238,551L238,551L238,551ZM236,546L236,546L236,546ZM236,546L236,546L236,546ZM236,548L236,548L236,548ZM235,544L235,541L236,541L242,546L245,551L239,548L242,552L240,550L239,547ZM231,535L231,535L231,535ZM234,545L234,545L234,545ZM233,545L233,545L233,545ZM230,539L232,536L235,536L238,538L234,541L233,544ZM225,528L229,529L231,534L230,537L229,535ZM225,527L225,527L225,527ZM222,524L222,524L222,524ZM224,536L225,535L228,535L230,540L231,544L226,540L226,537ZM222,529L222,529L222,529ZM224,537L224,537L224,537ZM220,528L220,528L220,528ZM221,530L221,530L221,530ZM220,533L222,530L226,531L228,534L224,534L224,536ZM183,522L183,522L183,522ZM182,522L182,522L182,522ZM177,519L177,519L177,519ZM176,521L176,521L176,521ZM177,524L177,524L177,524ZM175,527L178,523L179,524ZM175,524L175,524L175,524ZM174,521L174,521L174,521Z"},"borders":"M662,467L658,435L660,371L658,369L702,365L714,409L721,421L717,430L722,447L675,452L678,467M198,390L201,376L208,363L214,360L209,343L211,320L223,320L226,303L309,317L292,436M722,447L725,453L773,450L777,444L786,445M702,365L724,362L744,359L741,367L750,370L757,380L778,397L787,415L792,416M667,224L699,222L705,277L706,283L696,286L690,301L676,304L670,308L662,305L656,309L663,289L657,226M428,265L536,268L543,272L539,278L547,287L548,332L424,329M907,152L901,147L889,108M906,182L896,178L870,184L870,169L882,166L900,162L906,157M909,186L907,183M582,125L578,127L579,139L571,150L572,167L586,175L596,185L597,192L518,194L518,156L512,150L516,143L513,127L513,108L509,97L508,79M851,240L852,237L861,227L851,218L855,202L869,207L869,214M868,214L866,218M850,241L850,241M724,362L724,357L756,333L763,323L786,320L859,306M826,371L803,354L784,357L779,351L757,353L744,359M516,143L407,138L413,74M548,332L548,342L551,366L551,403L538,396L519,402L509,396L505,401L484,392L482,394L456,382L458,341L408,338L408,328M774,199L775,204L842,191L855,202M852,237L846,240L788,251L772,254L768,235L764,207M518,194L515,211L518,215L505,207L494,209L487,204L402,199L405,157L407,138M551,403L559,405L559,405L559,416L559,438L569,454L564,486M338,432L337,427L400,433L407,338L408,338M402,199L398,242M320,233L398,242L430,244L428,265L424,329L408,328L309,317L320,233L289,228L292,207L301,156L302,145L405,157M896,178L899,192M873,206L870,184M536,268L528,256L592,254L597,258L599,272L610,282L611,289L620,290L617,303L631,314L632,322L639,328L635,339L634,339L633,339L630,350L619,350L623,340L548,342M788,251L790,262L799,251L809,248L817,254L807,253L807,260L796,278L789,279L783,300L761,310L756,303L743,292L743,286L747,285L758,263L767,255L768,235M597,258L604,243L602,236L613,232L615,221L607,213L651,210M656,309L639,328M630,350L622,371L618,384L610,394L609,414L559,416M94,161L156,179L156,179L141,241L167,281L209,343M863,264L853,266L846,240M597,192L601,208L607,213M528,256L526,237L518,215M705,277L715,282L731,284L737,280L743,286M756,303L739,323L730,327L661,334L658,337L635,339M634,339L633,339M851,277L850,277M862,273L856,276M830,267L830,263M829,261L830,263L829,261L817,254M720,219L699,222M649,155L645,150L645,150L640,138L610,132L607,128L607,128L606,127M622,371L658,369M642,472L636,462L637,455L603,457L605,446L615,428L609,414M301,156L283,151L272,151L271,144L262,123L256,127L254,120L261,103L253,96L245,82L242,70L247,49M882,166L879,148L880,132L886,126L884,116M858,122L861,142L866,152L870,169M129,78L138,87L137,94L143,98L154,97L159,101L192,101L221,108L226,118L209,142L210,153L201,190L156,179M730,327L763,323M226,303L247,199L292,207M233,46L222,99L221,108M247,199L201,190","labels":{"ne":[854,177],"se":[780,380],"south":[552,411],"mid":[558,212],"nw":[194,122],"sw":[236,308],"rocky":[347,182],"hawaii":[351,551],"alaska":[159,497]},"parks":{"yellowstone":[307,158],"glacier":[277,62],"rockynp":[371,253],"yosemite":[142,266],"zion":[252,298],"grandcanyon":[255,329],"arches":[305,279],"acadia":[935,116]}};
+const MONTHS_FULL=['ינואר','פברואר','מרץ','אפריל','מאי','יוני','יולי','אוגוסט','ספטמבר','אוקטובר','נובמבר','דצמבר'];
+const MONTHS_SHORT=['ינו׳','פבר׳','מרץ','אפר׳','מאי','יוני','יולי','אוג׳','ספט׳','אוק׳','נוב׳','דצמ׳'];
+const LABELS=['','לא מומלץ','מאתגר','סביר','טוב','מצוין'];
+const GROUPS={main:'ארה״ב היבשתית',other:'מחוץ ליבשת'};
+// Main national parks: shown on the map as markers. Clicking one selects the region it sits in.
+const PARKS=[['yellowstone','ילוסטון','rocky'],['glacier','גליישר','rocky'],['yosemite','יוסמיטי','sw'],['zion','זיון וברייס','sw'],['grandcanyon','גרנד קניון','sw'],['arches','ארצ׳ס','sw']];
+const PRESETS=[['אביב (מרץ–מאי)',[2,3,4]],['קיץ (יוני–אוגוסט)',[5,6,7]],['סתיו (ספטמבר–נובמבר)',[8,9,10]],['חורף (דצמבר–פברואר)',[11,0,1]]];
+// Short names drawn on the map, and label nudges where the centroid collides with a park marker.
+const SHORT={ne:'צפון מזרח',se:'דרום מזרח',south:'הדרום',mid:'מרכז',nw:'צפון מערב',sw:'דרום מערב',rocky:'הרי הרוקי',hawaii:'הוואי',alaska:'אלסקה'};
+const NUDGE={sw:[-75,40],rocky:[40,-35],ne:[-10,10],nw:[0,10],hawaii:[0,-10]};
+
+// s = score per month, Jan..Dec, 1 (not recommended) to 5 (excellent)
+const DEST=[
+ {id:'ne',name:'צפון מזרח',group:'main',s:[2,2,3,4,5,4,3,3,5,5,3,3],note:'האביב והסתיו הם הזמן הטוב ביותר, עם שלכת מרהיבה בספטמבר–אוקטובר. בקיץ חם ולח בערים, ובחורף קר ומושלג.',inc:[['ניו יורק','אביב וסתיו'],['וושינגטון','סוף מרץ–אפריל (פריחת הדובדבן) וסתיו'],['בוסטון וניו אינגלנד','ספטמבר–אוקטובר (שלכת)'],['מפלי הניאגרה','יוני–ספטמבר'],['אקדיה (מיין)','יולי–אוקטובר']]},
+ {id:'se',name:'דרום מזרח',group:'main',s:[4,4,5,4,3,2,2,2,1,2,4,4],note:'החורף והאביב יבשים ונעימים. מיוני עד נובמבר עונת ההוריקנים, עם שיא באוגוסט–ספטמבר, והקיץ חם ולח מאוד.',inc:[['מיאמי וקי ווסט','דצמבר–אפריל'],['אורלנדו והפארקים','נובמבר–אפריל'],['אטלנטה','אביב וסתיו'],['צ׳רלסטון וסוואנה','מרץ–מאי']]},
+ {id:'south',name:'מדינות הדרום',group:'main',s:[3,4,5,5,4,2,2,2,2,4,4,3],note:'האביב הוא העונה הטובה ביותר, עם פסטיבלים ומזג אוויר נעים. הקיץ חם ולח מאוד, ובחוף המפרץ יש גם סיכון להוריקנים.',inc:[['ניו אורלינס','פברואר–מאי'],['טקסס (אוסטין, סן אנטוניו, יוסטון)','מרץ–מאי, אוקטובר–נובמבר'],['נאשוויל וממפיס','אפריל–מאי, ספטמבר–אוקטובר']]},
+ {id:'mid',name:'מרכז (המערב התיכון)',group:'main',s:[1,1,2,3,4,5,5,5,4,4,2,1],note:'הקיץ חם ותוסס, עם פסטיבלים וחופי אגמים. החורף קפוא, עם רוחות חזקות וסופות שלג.',inc:[['שיקגו','מאי–ספטמבר'],['האגמים הגדולים ומישיגן','יוני–ספטמבר'],['מינסוטה','יוני–אוגוסט']]},
+ {id:'nw',name:'צפון מערב',group:'main',s:[2,2,2,3,4,4,5,5,4,3,2,2],note:'יולי עד ספטמבר הם החלון הצלול והיבש. שאר השנה גשום ואפור, אבל לא קר במיוחד.',inc:[['סיאטל','יולי–ספטמבר'],['פורטלנד וחוף אורגון','יולי–ספטמבר'],['הר ריינייר','יולי–ספטמבר']]},
+ {id:'sw',name:'דרום מערב',group:'main',s:[4,4,5,5,4,3,3,3,4,5,5,4],note:'החוף נעים כמעט כל השנה. באזורי המדבר, כמו לאס וגאס, פיניקס ויוטה, הקיץ חם מאוד, ולכן האביב והסתיו נוחים יותר.',inc:[['לוס אנג׳לס','כל השנה, הכי נעים בספטמבר–אוקטובר'],['סן דייגו','כל השנה'],['סן פרנסיסקו','ספטמבר–אוקטובר'],['לאס וגאס','מרץ–מאי, אוקטובר–נובמבר'],['פיניקס','נובמבר–אפריל'],['יוסמיטי','מאי–יוני למפלים, יולי–ספטמבר למעבר טיוגה'],['זיון, ברייס וגרנד קניון','מרץ–מאי, ספטמבר–נובמבר'],['ארצ׳ס ומואב (יוטה)','אפריל–מאי, ספטמבר–אוקטובר']]},
+ {id:'rocky',name:'הרי הרוקי',group:'main',s:[2,2,2,2,3,4,5,5,5,3,2,2],note:'הקיץ ותחילת הסתיו הם הזמן לטיולים, כשכל הכבישים הגבוהים פתוחים. בחורף עונת סקי מצוינת בקולורדו ובמונטנה, אבל רוב הפארקים והכבישים הגבוהים סגורים.',inc:[['דנבר ובולדר','יוני–ספטמבר'],['אספן ווייל','דצמבר–מרץ לסקי, יולי–ספטמבר לטיולים'],['ילוסטון וגרנד טטון','יולי–ספטמבר'],['גליישר','יולי–ספטמבר']]},
+ {id:'hawaii',name:'הוואי',group:'other',s:[5,5,5,4,4,4,4,4,4,4,4,5],note:'טרופי ונעים כל השנה. החורף מעט גשום יותר בצד הצפוני של האיים, והקיץ יבש ושמשי.',inc:[['אואהו, מאווי, קאואי והאי הגדול','כל השנה']]},
+ {id:'alaska',name:'אלסקה',group:'other',s:[1,1,1,1,2,4,5,5,4,1,1,1],note:'עונת התיירות היא מאמצע מאי עד אמצע ספטמבר. מחוץ לזה רוב הכבישים והשירותים סגורים.',inc:[['קרוז לאלסקה','מאי–ספטמבר'],['דנאלי ואנקורג׳','יוני–אוגוסט']]},
+];
+const byId=Object.fromEntries(DEST.map(d=>[d.id,d]));
+const REGIONS=DEST;
+
+let mode='a';
+const selA=new Set(), selB=new Set();
+const $=id=>document.getElementById(id);
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const SVGNS='http://www.w3.org/2000/svg';
+function el(tag,attrs,parent){const e=document.createElementNS(SVGNS,tag);for(const k in attrs)e.setAttribute(k,attrs[k]);if(parent)parent.appendChild(e);return e;}
+
+// ---- Map ----
+function buildMap(){
+  const svg=$('usmap'); svg.setAttribute('viewBox',`0 0 ${MAP.w} ${MAP.h}`);
+  for(const r of REGIONS){
+    const p=el('path',{d:MAP.regions[r.id],class:'rg','data-id':r.id,tabindex:'0',role:'button','aria-label':r.name},svg);
+    el('title',{},p).textContent=r.name;
+  }
+  el('path',{d:MAP.borders,class:'bd'},svg);
+  for(const r of REGIONS){
+    const [x,y]=MAP.labels[r.id], [dx,dy]=NUDGE[r.id]||[0,0];
+    const t=el('text',{x:x+dx,y:y+dy,class:'lbl'},svg); t.textContent=SHORT[r.id];
+  }
+  for(const [pid,pname,reg] of PARKS){
+    const [x,y]=MAP.parks[pid];
+    const g=el('g',{class:'pk','data-region':reg,transform:`translate(${x},${y})`},svg);
+    el('title',{},g).textContent=pname+' · '+byId[reg].name;
+    el('circle',{r:'13'},g);
+    el('path',{d:'M0,-8 L7,5 L-7,5 Z'},g);
+  }
+  const act=e=>{
+    const t=e.target.closest('[data-id],[data-region]'); if(!t||!svg.contains(t))return;
+    if(e.type==='keydown'){ if(e.key!=='Enter'&&e.key!==' ')return; e.preventDefault(); }
+    onMapPick(t.dataset.id||t.dataset.region);
+  };
+  svg.addEventListener('click',act); svg.addEventListener('keydown',act);
+}
+function onMapPick(id){
+  if(mode==='a'){ toggleA(id); return; }
+  const li=$('rk-'+id);
+  if(li){ li.scrollIntoView({behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth',block:'center'}); li.classList.add('flash'); setTimeout(()=>li.classList.remove('flash'),1400); }
+}
+function paintMap(){
+  const months=[...selB];
+  document.querySelectorAll('#usmap [data-id]').forEach(n=>{
+    n.classList.remove('on','c1','c2','c3','c4','c5');
+    const d=byId[n.dataset.id];
+    if(mode==='a'){ if(selA.has(d.id)) n.classList.add('on'); }
+    else if(months.length){ n.classList.add('c'+Math.round(avg(d,months))); }
+    const t=n.querySelector('title');
+    t.textContent= mode==='b'&&months.length ? `${d.name}: ${avg(d,months).toFixed(1)} / 5` : d.name;
+  });
+  const legend=[1,2,3,4,5].map(v=>`<span><i class="c${v}"></i>${LABELS[v]}</span>`).join('');
+  $('mapHint').innerHTML = mode==='a'
+    ? `<span>לחצו על אזור כדי לבחור. אפשר לבחור כמה.</span><span><span class="tree"></span>פארק לאומי מרכזי</span>`
+    : (months.length ? `<div class="legend" style="margin:0">${legend}</div><span><span class="tree"></span>פארק לאומי מרכזי</span>` : `<span>בחרו עונה או חודשים, והמפה תיצבע לפי ההתאמה.</span>`);
+}
+const avg=(d,months)=>months.reduce((a,i)=>a+d.s[i],0)/months.length;
+
+// ---- Mode A ----
+function toggleA(id){ selA.has(id)?selA.delete(id):selA.add(id); renderChipsA(); renderA(); renderSumA(); paintMap(); }
+// Group month indexes into ranges like "מרץ–מאי", wrapping around the year.
+function ranges(idx){
+  if(!idx.length) return '';
+  if(idx.length===12) return 'כל השנה';
+  const set=new Set(idx); let start=0; while(set.has(start)) start=(start+1)%12;
+  const out=[]; let run=[];
+  for(let k=1;k<=12;k++){ const m=(start+k)%12; if(set.has(m)) run.push(m); else if(run.length){out.push(run);run=[];} }
+  if(run.length) out.push(run);
+  return out.map(r=>r.length===1?MONTHS_FULL[r[0]]:MONTHS_FULL[r[0]]+'–'+MONTHS_FULL[r[r.length-1]]).join(', ');
+}
+function calHTML(status){
+  const sym={g:'✓',m:'–',b:'✕'};
+  return `<div class="cal">${status.map((st,i)=>`<span class="${st}" title="${MONTHS_FULL[i]}"><i>${sym[st]}</i>${MONTHS_SHORT[i]}</span>`).join('')}</div>
+  <div class="cal-key"><span><i style="background:var(--g-bg)"></i>מומלץ</span><span><i style="background:var(--m-bg)"></i>אפשרי</span><span><i style="background:var(--b-bg)"></i>פחות מומלץ</span></div>`;
+}
+function renderSumA(){
+  const sel=DEST.filter(d=>selA.has(d.id));
+  if(!sel.length){ $('sumA').innerHTML=''; return; }
+  const mins=MONTHS_FULL.map((_,i)=>Math.min(...sel.map(d=>d.s[i])));
+  const status=mins.map(v=>v>=4?'g':v===3?'m':'b');
+  const names=sel.map(d=>d.name).join(' + ');
+  let big, sub='';
+  const good=mins.map((v,i)=>v>=4?i:-1).filter(i=>i>=0);
+  if(good.length){
+    const top=Math.max(...mins); const peak=mins.map((v,i)=>v===top?i:-1).filter(i=>i>=0);
+    big=`הכי כדאי: ${ranges(peak)}`;
+    if(good.length>peak.length) sub=`גם טוב: <b>${ranges(good.filter(i=>!peak.includes(i)))}</b>`;
+  } else {
+    const top=Math.max(...mins); const best=mins.map((v,i)=>v===top?i:-1).filter(i=>i>=0);
+    big=`אין חודש שמושלם לכולם. הכי פחות פשרה: ${ranges(best)}`;
+    sub='כדאי לשקול לפצל לשני טיולים נפרדים.';
+  }
+  const bad=mins.map((v,i)=>v<=2?i:-1).filter(i=>i>=0);
+  if(bad.length) sub+=(sub?'<br>':'')+`פחות מומלץ: <b>${ranges(bad)}</b>`;
+  $('sumA').innerHTML=`<div class="sum"><p class="k">השורה התחתונה · ${esc(names)}</p><p class="big">${big}</p>${sub?`<p class="sub">${sub}</p>`:''}${calHTML(status)}</div>`;
+}
+function renderChipsA(){
+  let html='';
+  for(const g of ['main','other']){
+    html+=`<div class="group">${GROUPS[g]}</div>`;
+    DEST.filter(d=>d.group===g).forEach(d=>{ html+=`<button class="chip" data-id="${d.id}" aria-pressed="${selA.has(d.id)}">${esc(d.name)}</button>`; });
+  }
+  $('chipsA').innerHTML=`<div class="chips">${html}</div>`;
+}
+function heatHTML(s){
+  const head=MONTHS_SHORT.map(m=>`<span class="mh">${m}</span>`).join('');
+  const cells=s.map((v,i)=>`<span class="cell c${v}" title="${MONTHS_FULL[i]}: ${LABELS[v]}">${v}</span>`).join('');
+  return `<div class="heat">${head}${cells}</div>`;
+}
+function bestMonths(s){ const max=Math.max(...s); return s.map((v,i)=>v===max?MONTHS_FULL[i]:null).filter(Boolean); }
+function renderA(){
+  if(!selA.size){ $('outA').innerHTML='<div class="hint">לחצו על אזור במפה, או בחרו מהרשימה, כדי לראות מתי כדאי לטוס אליו.</div>'; return; }
+  const sel=DEST.filter(d=>selA.has(d.id));
+  const legend=`<div class="legend" style="margin-top:12px">${[1,2,3,4,5].map(v=>`<span><i class="c${v}"></i>${LABELS[v]}</span>`).join('')}</div>`;
+  const cards=sel.map(d=>`<article class="card"><h3>${esc(d.name)}</h3>
+      <p class="best">הכי מומלץ: <b>${bestMonths(d.s).join(', ')}</b></p>
+      ${heatHTML(d.s)}
+      <p class="note">${esc(d.note)}</p>
+      ${d.inc?`<p class="inc-h">מה כלול באזור ומתי הכי כדאי:</p><ul class="inc">${d.inc.map(x=>`<li><b>${esc(x[0])}</b><span>${esc(x[1])}</span></li>`).join('')}</ul>`:''}
+    </article>`).join('');
+  $('outA').innerHTML=cards+legend;
+}
+
+// ---- Mode B ----
+function renderChipsB(){
+  $('presets').innerHTML=PRESETS.map((p,k)=>`<button data-preset="${k}">${p[0]}</button>`).join('');
+  $('chipsB').innerHTML=MONTHS_FULL.map((m,i)=>`<button class="chip" data-m="${i}" aria-pressed="${selB.has(i)}">${m}</button>`).join('');
+}
+function renderB(){
+  if(!selB.size){ $('outB').innerHTML=''; $('sumB').innerHTML=''; return; }
+  const idxs=[...selB].sort((a,b)=>a-b);
+  const ranked=REGIONS.map(d=>({d,avg:avg(d,idxs),weak:idxs.filter(i=>d.s[i]<=2)})).sort((a,b)=>b.avg-a.avg);
+  const preset=PRESETS.find(p=>p[1].length===idxs.length&&p[1].every(m=>selB.has(m)));
+  const when=preset?preset[0].split(' (')[0]:ranges(idxs);
+  const weakAll=ranked[0].avg<3?'<p class="sub">אף אזור לא מתאים במיוחד לתקופה הזו. שקלו לזוז כמה שבועות קדימה או אחורה.</p>':'';
+  const skip=ranked.slice(-2).reverse().map(r=>r.d.name).join(', ');
+  $('sumB').innerHTML=`<div class="sum"><p class="k">השורה התחתונה · ${esc(when)}</p><p class="big">הכי כדאי לטוס ל${esc(ranked[0].d.name)}</p>
+    <div class="top3">${ranked.slice(0,3).map((r,k)=>`<div><span class="n">מקום ${k+1}</span><strong>${esc(r.d.name)}</strong><em dir="ltr">${r.avg.toFixed(1)} / 5</em></div>`).join('')}</div>
+    ${weakAll}<p class="sub">פחות מתאים בתקופה הזו: <b>${esc(skip)}</b></p></div>`;
+  $('outB').innerHTML=`<ol class="rank">${ranked.map(({d,avg,weak})=>`
+    <li id="rk-${d.id}"><div class="rk-head"><span class="rk-name">${esc(d.name)}</span><span class="rk-score" dir="ltr">${avg.toFixed(1)} / 5</span></div>
+    <div class="bar"><span style="width:${(avg/5*100).toFixed(0)}%"></span></div>
+    ${weak.length?`<p class="warn">בחלק מהחודשים שבחרתם התנאים מאתגרים: ${weak.map(i=>MONTHS_FULL[i]).join(', ')}</p>`:''}
+    <p class="inc-line">כולל: ${d.inc.map(x=>esc(x[0])).join(' · ')}</p>
+    <p class="note">${esc(d.note)}</p></li>`).join('')}</ol>`;
+}
+
+// ---- Wiring ----
+function setMode(m){
+  mode=m; const isA=m==='a';
+  $('tabA').setAttribute('aria-pressed',isA); $('tabB').setAttribute('aria-pressed',!isA);
+  $('modeA').hidden=!isA; $('modeB').hidden=isA;
+  $(isA?'mapSlotA':'mapSlotB').appendChild($('mapArea'));
+  paintMap();
+}
+document.querySelector('.wrap').addEventListener('click',e=>{
+  const t=e.target.closest('button'); if(!t) return;
+  if(t.dataset.mode){ setMode(t.dataset.mode); return; }
+  if(t.dataset.id){ toggleA(t.dataset.id); return; }
+  if(t.dataset.m!==undefined){ const i=+t.dataset.m; selB.has(i)?selB.delete(i):selB.add(i); renderChipsB(); renderB(); paintMap(); return; }
+  if(t.dataset.preset!==undefined){
+    const months=PRESETS[+t.dataset.preset][1];
+    const same=months.length===selB.size&&months.every(m=>selB.has(m));
+    selB.clear(); if(!same) months.forEach(m=>selB.add(m));
+    renderChipsB(); renderB(); paintMap();
+  }
+});
+
+buildMap(); renderChipsA(); renderA(); renderChipsB(); renderB(); setMode('a');
+})();
+</script>
+
+<script>
+// Tell the hosting page how tall the tool is, so its frame can fit it without an inner scrollbar.
+(function(){var last=0;function send(){var h=document.documentElement.scrollHeight;if(h!==last){last=h;parent.postMessage({type:"usa-season-height",h:h},"*");}}
+if(window.ResizeObserver){new ResizeObserver(send).observe(document.body);}window.addEventListener("load",send);document.addEventListener("click",function(){setTimeout(send,50);});send();})();
+</script>
+</body>
+</html>
